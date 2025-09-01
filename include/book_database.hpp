@@ -2,6 +2,7 @@
 
 #include <print>
 #include <string>
+#include <unordered_set>
 #include <string_view>
 #include <vector>
 
@@ -15,21 +16,59 @@ template <BookContainerLike BookContainer = std::vector<Book>>
 class BookDatabase {
 public:
     // Type aliases
+    using value_type = BookContainer::value_type;
+    using reference = BookContainer::value_type&;
+    using const_reference = const BookContainer::value_type&;
+    using difference_type = std::ptrdiff_t;
+    using iterator = BookContainer::iterator;
+    using const_iterator = BookContainer::const_iterator;
+    using size_type = std::size_t;
 
-    // Ваш код здесь
+//    using AuthorContainer = BookContainer /* Ваш код здесь */;
+    using AuthorContainer = std::unordered_set<std::string>;
 
-    using AuthorContainer = BookContainer /* Ваш код здесь */;
-
+    // API
     BookDatabase() = default;
+
+    iterator begin() {
+        return books_.begin();
+    }
+    const_iterator cbegin() const {
+        return books_.cbegin();
+    }
+    iterator end() const {
+        return books_.end();
+    }
+    const_iterator cend() const {
+        return books_.cend();
+    }
+    size_type size() const {
+        return books_.size();
+    }
+    bool empty() const {
+        return books_.empty();
+    }
+    reference operator[](size_t id) {
+        return books_[id];
+    }
+    const_reference operator[](size_t id) const {
+        return books_.at(id);
+    }
+
+    template<typename T = Book>
+    void PushBack(T&& book) {
+        books_.push_back(std::forward<T>(book));
+    }
+
+    template<typename... Args>
+    void EmplaceBack(Args... args) {
+        books_.emplace_back(args...);
+    }
 
     void Clear() {
         books_.clear();
         authors_.clear();
     }
-
-    // Standard container interface methods
-
-    // Ваш код здесь
 
 private:
     BookContainer books_;
