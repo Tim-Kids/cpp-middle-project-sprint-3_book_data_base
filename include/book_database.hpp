@@ -2,9 +2,10 @@
 
 #include <print>
 #include <string>
-#include <unordered_set>
-#include <string_view>
 #include <vector>
+#include <string_view>
+#include <unordered_set>
+#include <boost/container/flat_set.hpp>
 
 #include "book.hpp"
 #include "concepts.hpp"
@@ -13,6 +14,7 @@
 namespace bookdb {
 
 template <BookContainerLike BookContainer = std::vector<Book>>
+//template <BookContainerLike BookContainer = boost::container::flat_set<Book>>
 class BookDatabase {
 public:
     // Type aliases
@@ -29,6 +31,12 @@ public:
 
     // API
     BookDatabase() = default;
+    explicit BookDatabase(std::initializer_list<Book> lst) {
+        std::for_each(lst.begin(), lst.end(), [&](auto&& book) {
+             authors_.emplace(book.author);
+             books_.emplace_back(std::move(book));
+        });
+    }
 
     iterator begin() {
         return books_.begin();
@@ -58,6 +66,7 @@ public:
     template<typename T = Book>
     void PushBack(T&& book) {
         books_.push_back(std::forward<T>(book));
+        authors_.emplace(books_.back().author);
     }
 
     template<typename... Args>
