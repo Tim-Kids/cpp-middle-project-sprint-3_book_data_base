@@ -10,15 +10,29 @@ enum class Genre { Fiction, NonFiction, SciFi, Biography, Mystery, Unknown };
 
 // Ваш код для constexpr преобразования строк в enum::Genre и наоборот здесь
 
+using namespace std::string_view_literals;
+
 constexpr Genre GenreFromString(std::string_view s) {
     // Ваш код здесь
-    return Genre::Unknown;
+    if (s == "Fiction"sv) {
+        return Genre::Fiction;
+    } else if (s == "NonFiction") {
+        return Genre::NonFiction;
+    } else if (s == "SciFi") {
+        return Genre::SciFi;
+    } else if (s == "Biography") {
+        return Genre::Biography;
+    } else if (s == "Mystery") {
+        return Genre::Mystery;
+    } else {
+        return Genre::Unknown;
+    }
 }
 
 struct Book {
     // string_view для экономии памяти, чтобы ссылаться на оригинальную строку, хранящуюся в другом контейнере
-    std::string_view author;
     std::string title;
+    std::string_view author;
 
     int year;
     Genre genre;
@@ -26,6 +40,14 @@ struct Book {
     int read_count;
 
     // Ваш код для конструкторов здесь
+    explicit constexpr Book(std::string title, std::string_view author, int year, Genre genre, double rating,
+                            int read_count)
+        : title(std::move(title)), author(author), year(year), genre(genre), rating(rating), read_count(read_count) {}
+
+    explicit constexpr Book(std::string title, std::string_view author, int year, std::string_view genre, double rating,
+                            int read_count)
+        : title(std::move(title)), author(author), year(year), genre(GenreFromString(genre)), rating(rating),
+          read_count(read_count) {}
 };
 }  // namespace bookdb
 
