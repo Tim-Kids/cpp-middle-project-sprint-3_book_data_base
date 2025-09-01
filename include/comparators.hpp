@@ -4,6 +4,25 @@
 
 namespace bookdb::comp {
 
-struct LessByAuthor {};
+struct LessByYear {
+    bool operator()(const Book& lhs, const Book& rhs) {
+        return lhs.year < rhs.year;
+    }
+};
+struct LessByTitle {
+    bool operator()(const Book& lhs, const Book& rhs) {
+        return lhs.title < rhs.title;
+    }
+};
+struct LessByAuthor {
+    bool operator()(const Book& lhs, const Book& rhs) {
+        return lhs.author < rhs.author;
+    }
+};
+struct MoreByRating {
+    bool operator()(const Book& lhs, const Book& rhs) {
+        return lhs.rating > rhs.rating;
+    }
+};
 
 }  // namespace bookdb::comp
