@@ -30,9 +30,8 @@ constexpr Genre GenreFromString(std::string_view s) {
 }
 
 struct Book {
-    // string_view для экономии памяти, чтобы ссылаться на оригинальную строку, хранящуюся в другом контейнере
     std::string title;
-    std::string_view author;
+    std::string_view author;    // Ссылаемся на оригиналы строк в конетйнере AuthorContainer. Экономим память.
 
     int year;
     Genre genre;
@@ -79,6 +78,7 @@ struct formatter<bookdb::Genre, char> {
     }
 };
 
+// Ваш код для std::formatter<Book> здесь
 template <>
 struct formatter<bookdb::Book, char> {
     template <typename FormatContext>
@@ -105,7 +105,5 @@ struct formatter<bookdb::Book, char> {
         return ctx.begin();  // Просто игнорируем пользовательский формат
     }
 };
-
-// Ваш код для std::formatter<Book> здесь
 
 }  // namespace std
