@@ -37,7 +37,6 @@ class BookDatabase {
         std::for_each(books.begin(), books.end(), [&](auto&& book) {
             authors_.emplace_back(books.author);
             books_.push_back(std::forward<Book>(book));
-            books_.back().author = authors_.back();
         });
     }
 
@@ -75,7 +74,7 @@ class BookDatabase {
     template<typename... Args> void EmplaceBack(Args... args) {
         books_.emplace_back(args...);
         authors_.emplace_back(books_.back().author);
-        books_.back().author = authors_.back();
+//        books_.back().author = authors_.back();
     }
     std::span<const Book> GetBooks() const {
         return books_;

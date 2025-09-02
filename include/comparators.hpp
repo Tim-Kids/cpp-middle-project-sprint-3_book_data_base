@@ -24,7 +24,7 @@ struct MoreByRating {
         return lhs.rating > rhs.rating;
     }
 };
-struct LessByPopularity {
+struct MoreByPopularity {
     bool operator()(const Book& lhs, const Book& rhs) {
         return lhs.read_count > rhs.read_count;
     }
