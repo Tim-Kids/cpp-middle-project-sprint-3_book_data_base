@@ -3,6 +3,8 @@
 #include <print>
 #include <string>
 #include <vector>
+#include <flat_set>
+#include <flat_map>
 #include <string_view>
 #include <unordered_set>
 #include <boost/container/flat_set.hpp>
@@ -13,9 +15,7 @@
 
 namespace bookdb {
 
-template<BookContainerLike BookContainer = std::vector<Book>>
-// template <BookContainerLike BookContainer = boost::container::flat_set<Book>>
-class BookDatabase {
+template<BookContainerLike BookContainer = std::vector<Book>> class BookDatabase {
     public:
     // Type aliases
     using value_type      = BookContainer::value_type;
@@ -26,16 +26,15 @@ class BookDatabase {
     using const_iterator  = BookContainer::const_iterator;
     using size_type       = std::size_t;
 
-//    using AuthorContainer = BookContainer /* Ваш код здесь */;
-    using AuthorContainer = std::vector<std::string>;
+    //    using AuthorContainer = BookContainer /* Ваш код здесь */;
+    using AuthorContainer = std::unordered_set<std::string>;
 
     // API
     BookDatabase() = default;
 
-    template<typename T>
-    constexpr BookDatabase(std::initializer_list<T> books) {
+    template<typename T> constexpr BookDatabase(std::initializer_list<T> books) {
         std::for_each(books.begin(), books.end(), [&](auto&& book) {
-            authors_.emplace_back(books.author);
+            authors_.emplace(books.author);
             books_.push_back(std::forward<Book>(book));
         });
     }
@@ -66,20 +65,20 @@ class BookDatabase {
     }
 
     void PushBack(const Book& book) {
-        authors_.emplace_back(book.author);
+        authors_.emplace(book.author);
         books_.push_back(book);
-        books_.back().author = authors_.back();
+        //        books_.back().author = authors_.back();
     }
 
     template<typename... Args> void EmplaceBack(Args... args) {
         books_.emplace_back(args...);
-        authors_.emplace_back(books_.back().author);
-//        books_.back().author = authors_.back();
+        authors_.emplace(books_.back().author);
+        //        books_.back().author = authors_.back();
     }
     std::span<const Book> GetBooks() const {
         return books_;
     }
-    std::span<const std::string> GetAuthors() const {
+    auto& GetAuthors() const {
         return authors_;
     }
 
@@ -90,7 +89,7 @@ class BookDatabase {
 
     private:
     BookContainer books_;
-    AuthorContainer authors_;   // Хранит оригиналы строк.
+    AuthorContainer authors_;  // Хранит оригиналы строк.
 };
 
 }  // namespace bookdb
@@ -101,11 +100,11 @@ template<> struct formatter<bookdb::BookDatabase<std::vector<bookdb::Book>>> {
     auto format(const bookdb::BookDatabase<std::vector<bookdb::Book>>& db, FormatContext& fc) const {
         format_to(fc.out(), "BookDatabase (size = {}): ", db.size());
         format_to(fc.out(), "Books:\n");
-        for (const bookdb::Book &book : db.GetBooks()) {
+        for(const bookdb::Book& book: db.GetBooks()) {
             format_to(fc.out(), "- {}\n", book);
         }
         format_to(fc.out(), "Authors:\n");
-        for (const auto &author : db.GetAuthors()) {
+        for(const auto& author: db.GetAuthors()) {
             format_to(fc.out(), "- {}\n", author);
         }
         return fc.out();
@@ -115,4 +114,20 @@ template<> struct formatter<bookdb::BookDatabase<std::vector<bookdb::Book>>> {
         return ctx.begin();  // Просто игнорируем пользовательский формат
     }
 };
+
+template<> struct formatter<std::flat_map<std::string_view, unsigned short int, bookdb::TransparentStringLess>> {
+    template<typename FormatContext>
+    auto format(const std::flat_map<std::string_view, unsigned short int, bookdb::TransparentStringLess>& histogram,
+                FormatContext& fc) const {
+        for(const auto& [author, freq]: histogram) {
+            format_to(fc.out(), "{} -> {}\n", author, freq);
+        }
+        return fc.out();
+    }
+
+    constexpr auto parse(format_parse_context& ctx) {
+        return ctx.begin();  // Просто игнорируем пользовательский формат
+    }
+};
+
 }  // namespace std
