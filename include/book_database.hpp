@@ -77,10 +77,10 @@ class BookDatabase {
         authors_.emplace_back(books_.back().author);
         books_.back().author = authors_.back();
     }
-    std::span<const Book> getBooks() const {
+    std::span<const Book> GetBooks() const {
         return books_;
     }
-    std::span<const std::string> getAuthors() const {
+    std::span<const std::string> GetAuthors() const {
         return authors_;
     }
 
@@ -102,11 +102,11 @@ template<> struct formatter<bookdb::BookDatabase<std::vector<bookdb::Book>>> {
     auto format(const bookdb::BookDatabase<std::vector<bookdb::Book>>& db, FormatContext& fc) const {
         format_to(fc.out(), "BookDatabase (size = {}): ", db.size());
         format_to(fc.out(), "Books:\n");
-        for (const bookdb::Book &book : db.getBooks()) {
+        for (const bookdb::Book &book : db.GetBooks()) {
             format_to(fc.out(), "- {}\n", book);
         }
         format_to(fc.out(), "Authors:\n");
-        for (const auto &author : db.getAuthors()) {
+        for (const auto &author : db.GetAuthors()) {
             format_to(fc.out(), "- {}\n", author);
         }
         return fc.out();
