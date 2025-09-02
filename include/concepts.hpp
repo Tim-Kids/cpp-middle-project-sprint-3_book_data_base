@@ -23,8 +23,8 @@ template<typename Iter>
 concept BookIterator =
     std::forward_iterator<Iter> || std::random_access_iterator<Iter> || std::bidirectional_iterator<Iter>;
 
-template<typename S, typename Iter>
-concept BookSentinel = std::sentinel_for<S, Iter>;
+template<typename S, typename It>
+concept BookSentinel = std::sentinel_for<S, It>;
 
 template<typename Pred, typename T = Book>
 concept BookPredicate = std::predicate<Pred, const T&>;  // Проверит, что тип Pred принимает один аргумент типа const T&

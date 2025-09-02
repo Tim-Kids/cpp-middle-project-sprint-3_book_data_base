@@ -3,7 +3,6 @@
 #include <print>
 #include <string>
 #include <vector>
-#include <flat_set>
 #include <flat_map>
 #include <string_view>
 #include <unordered_set>
@@ -121,6 +120,20 @@ template<> struct formatter<std::flat_map<std::string_view, unsigned short int, 
                 FormatContext& fc) const {
         for(const auto& [author, freq]: histogram) {
             format_to(fc.out(), "{} -> {}\n", author, freq);
+        }
+        return fc.out();
+    }
+
+    constexpr auto parse(format_parse_context& ctx) {
+        return ctx.begin();  // Просто игнорируем пользовательский формат
+    }
+};
+
+template<> struct formatter<std::flat_map<bookdb::Genre, double>> {
+    template<typename FormatContext>
+    auto format(const std::flat_map<bookdb::Genre, double>& genreRating, FormatContext& fc) const {
+        for(const auto& [genre, rating]: genreRating) {
+            format_to(fc.out(), "{} -> {}\n", bookdb::StringFromGenre(genre), static_cast<float>(rating));
         }
         return fc.out();
     }
