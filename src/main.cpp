@@ -47,8 +47,8 @@ int main() {
     std::print("Books sorted by popularity: {}\n\n==================\n", db);
 
     // Author histogram
-    //    auto histogram = buildAuthorHistogramFlat(db);
-    //    std::print("Author histogram: {}", histogram);
+    auto histogram = buildAuthorHistogramFlat(db);
+    std::print("Author histogram:\n{}", histogram);
 
     // Ratings
     //    auto genreRatings = calculateGenreRatings(db.begin(), db.end());
