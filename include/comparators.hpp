@@ -24,5 +24,10 @@ struct MoreByRating {
         return lhs.rating > rhs.rating;
     }
 };
+struct LessByPopularity {
+    bool operator()(const Book& lhs, const Book& rhs) {
+        return lhs.read_count > rhs.read_count;
+    }
+};
 
 }  // namespace bookdb::comp
