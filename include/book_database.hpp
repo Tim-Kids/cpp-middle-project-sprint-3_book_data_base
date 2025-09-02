@@ -26,15 +26,18 @@ class BookDatabase {
     using const_iterator  = BookContainer::const_iterator;
     using size_type       = std::size_t;
 
-    //    using AuthorContainer = BookContainer /* Ваш код здесь */;
-    using AuthorContainer = std::unordered_set<std::string>;
+//    using AuthorContainer = BookContainer /* Ваш код здесь */;
+    using AuthorContainer = std::vector<std::string>;
 
     // API
     BookDatabase() = default;
-    explicit BookDatabase(std::initializer_list<Book> lst) {
-        std::for_each(lst.begin(), lst.end(), [&](auto&& book) {
-            authors_.emplace(book.author);
-            books_.emplace_back(std::move(book));
+
+    template<typename T>
+    constexpr BookDatabase(std::initializer_list<T> books) {
+        std::for_each(books.begin(), books.end(), [&](auto&& book) {
+            authors_.emplace_back(books.author);
+            books_.push_back(std::forward<Book>(book));
+            books_.back().author = authors_.back();
         });
     }
 
@@ -63,18 +66,21 @@ class BookDatabase {
         return books_.at(id);
     }
 
-    template<typename T = Book> void PushBack(T&& book) {
-        books_.push_back(std::forward<T>(book));
-        authors_.emplace(books_.back().author);
+    void PushBack(const Book& book) {
+        authors_.emplace_back(book.author);
+        books_.push_back(book);
+        books_.back().author = authors_.back();
     }
 
     template<typename... Args> void EmplaceBack(Args... args) {
         books_.emplace_back(args...);
+        authors_.emplace_back(books_.back().author);
+        books_.back().author = authors_.back();
     }
-    const BookContainer& getBooks() const {
+    std::span<const Book> getBooks() const {
         return books_;
     }
-    const AuthorContainer& getAuthors() const {
+    std::span<const std::string> getAuthors() const {
         return authors_;
     }
 
@@ -85,7 +91,7 @@ class BookDatabase {
 
     private:
     BookContainer books_;
-    AuthorContainer authors_;
+    AuthorContainer authors_;   // Хранит оригиналы строк.
 };
 
 }  // namespace bookdb
@@ -94,22 +100,15 @@ namespace std {
 template<> struct formatter<bookdb::BookDatabase<std::vector<bookdb::Book>>> {
     template<typename FormatContext>
     auto format(const bookdb::BookDatabase<std::vector<bookdb::Book>>& db, FormatContext& fc) const {
-        /*
-        Раскомментируйте, когда bookdb::BookDatabase поддержит интерфейсы, доступные стандартным контейнерам
-        (size/begin/...)
-
         format_to(fc.out(), "BookDatabase (size = {}): ", db.size());
-
         format_to(fc.out(), "Books:\n");
-        for (const auto &book : db.GetBooks()) {
+        for (const bookdb::Book &book : db.getBooks()) {
             format_to(fc.out(), "- {}\n", book);
         }
-
         format_to(fc.out(), "Authors:\n");
-        for (const auto &author : db.GetAuthors()) {
+        for (const auto &author : db.getAuthors()) {
             format_to(fc.out(), "- {}\n", author);
         }
-        */
         return fc.out();
     }
 
