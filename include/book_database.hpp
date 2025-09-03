@@ -151,4 +151,18 @@ template<> struct formatter<std::flat_map<bookdb::Genre, double>> {
     }
 };
 
+template<> struct formatter<std::vector<std::reference_wrapper<bookdb::Book>>> {
+    template<typename FormatContext>
+    auto format(const std::vector<std::reference_wrapper<bookdb::Book>>& books, FormatContext& fc) const {
+        for(const auto book : books) {
+            format_to(fc.out(), "{} -> {}\n", book.get().author, book.get().title);
+        }
+        return fc.out();
+    }
+
+    constexpr auto parse(format_parse_context& ctx) {
+        return ctx.begin(); // Просто игнорируем пользовательский формат
+    }
+};
+
 } // namespace std
