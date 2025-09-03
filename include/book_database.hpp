@@ -15,7 +15,7 @@
 
 namespace bookdb {
 
-template<BookContainerLike BookContainer = std::deque<Book>> class BookDatabase {
+template<BookContainerLike BookContainer = std::vector<Book>> class BookDatabase {
     public:
     using value_type      = typename BookContainer::value_type;
     using reference       = typename BookContainer::value_type&;
@@ -69,10 +69,9 @@ template<BookContainerLike BookContainer = std::deque<Book>> class BookDatabase 
         return books_.at(id);
     }
 
-    template<typename T = Book>
-    void PushBack(T&& book) {
+    template<typename T = Book> void PushBack(T&& book) {
         auto [it, _] = authors_.emplace(book.author);
-        book.author = *it;
+        book.author  = *it;
         books_.push_back(std::forward<T>(book));
     }
 
@@ -81,8 +80,8 @@ template<BookContainerLike BookContainer = std::deque<Book>> class BookDatabase 
         books_.emplace_back(std::string {title}, *it, year, genre, rating, pages);
     }
 
-    std::span<const Book> GetBooks() const {
-        return books_;
+    auto GetBooks() const {
+        return std::span{books_.data(), books_.size()};
     }
 
     auto& GetAuthors() const {
@@ -96,10 +95,10 @@ template<BookContainerLike BookContainer = std::deque<Book>> class BookDatabase 
 
     private:
     BookContainer books_;
-    AuthorContainer authors_; // Хранит оригиналы строк.
+    AuthorContainer authors_;  // Хранит оригиналы строк.
 };
 
-} // namespace bookdb
+}  // namespace bookdb
 
 namespace std {
 template<> struct formatter<bookdb::BookDatabase<std::vector<bookdb::Book>>> {
@@ -118,7 +117,7 @@ template<> struct formatter<bookdb::BookDatabase<std::vector<bookdb::Book>>> {
     }
 
     constexpr auto parse(format_parse_context& ctx) {
-        return ctx.begin(); // Просто игнорируем пользовательский формат
+        return ctx.begin();  // Просто игнорируем пользовательский формат
     }
 };
 
@@ -133,7 +132,7 @@ template<> struct formatter<std::flat_map<std::string_view, unsigned short int, 
     }
 
     constexpr auto parse(format_parse_context& ctx) {
-        return ctx.begin(); // Просто игнорируем пользовательский формат
+        return ctx.begin();  // Просто игнорируем пользовательский формат
     }
 };
 
@@ -147,22 +146,22 @@ template<> struct formatter<std::flat_map<bookdb::Genre, double>> {
     }
 
     constexpr auto parse(format_parse_context& ctx) {
-        return ctx.begin(); // Просто игнорируем пользовательский формат
+        return ctx.begin();  // Просто игнорируем пользовательский формат
     }
 };
 
 template<> struct formatter<std::vector<std::reference_wrapper<const bookdb::Book>>> {
     template<typename FormatContext>
     auto format(const std::vector<std::reference_wrapper<const bookdb::Book>>& books, FormatContext& fc) const {
-        for(const auto book : books) {
+        for(const auto book: books) {
             format_to(fc.out(), "{} -> {}\n", book.get().author, book.get().title);
         }
         return fc.out();
     }
 
     constexpr auto parse(format_parse_context& ctx) {
-        return ctx.begin(); // Просто игнорируем пользовательский формат
+        return ctx.begin();  // Просто игнорируем пользовательский формат
     }
 };
 
-} // namespace std
+}  // namespace std

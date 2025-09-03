@@ -65,18 +65,6 @@ TEST(BookDatabaseAPI, IteratorsAllowStdSort) {
     EXPECT_EQ(it->title, "C");
 }
 
-// --- Formatting with std::format / std::print ---
-TEST(BookDatabaseAPI, HasStdFormatterAndProducesNonEmptyOutput) {
-    BookDatabase db;
-    db.EmplaceBack("The Hobbit", "J.R.R. Tolkien", 1937, Genre::Fiction, 4.9, 203);
-    db.EmplaceBack("Brave New World", "Aldous Huxley", 1932, Genre::SciFi, 4.5, 98);
-
-    //    std::string s = std::format("{}", db);
-    //    EXPECT_FALSE(s.empty());
-    //    EXPECT_NE(s.find("The Hobbit"), std::string::npos);
-    //    EXPECT_NE(s.find("Brave New World"), std::string::npos);
-}
-
 // --- Author search with std::find_if ---
 TEST(BookDatabaseAPI, CanFindAuthorWithStdAlgorithms) {
     BookDatabase db;
@@ -92,20 +80,13 @@ TEST(BookDatabaseAPI, CanFindAuthorWithStdAlgorithms) {
 TEST(BookDatabaseAPI, OptionalViewsIfProvided) {
     BookDatabase db;
     db.EmplaceBack("Dune", "Frank Herbert", 1965, Genre::SciFi, 4.2, 688);
-#ifdef __cpp_lib_span
-    // auto books_view = db.GetBooks();
-    // EXPECT_GE(books_view.size(), 1u);
-#endif
+     auto books_view = db.GetBooks();
+     EXPECT_GE(books_view.size(), 1u);
 }
 
 // ================= Additional tests: Filters & Statistics =================
 #include "filters.hpp"
 #include "statsistics.hpp"
-
-// NOTE: The project headers for filters/stats are not fully implemented yet.
-// The following tests are added as **skeletons** with GTEST_SKIP() so your
-// build stays green. Uncomment the example code in each test once you implement
-// the corresponding API.
 
 TEST(FiltersAPI, Predicates_Composition_Smoke) {
     GTEST_SKIP() << "Enable when filters predicates are implemented.";
@@ -136,52 +117,52 @@ TEST(FiltersAPI, FilterBooks_Helper_ReturnsMatches) {
 
 TEST(StatsAPI, BuildAuthorHistogramFlat_Smoke) {
     GTEST_SKIP() << "Enable when buildAuthorHistogramFlat(...) is implemented.";
-    // using namespace bookdb;
-    // BookDatabase db;
-    // db.EmplaceBack("A", "X", 2000, Genre::Fiction, 4.1, 120);
-    // db.EmplaceBack("B", "X", 2001, Genre::Fiction, 4.2, 130);
-    // db.EmplaceBack("C", "Y", 2002, Genre::Fiction, 4.3, 140);
-    // auto hist = buildAuthorHistogramFlat(db);
-    // EXPECT_EQ(hist["X"], 2u);
-    // EXPECT_EQ(hist["Y"], 1u);
+     using namespace bookdb;
+     BookDatabase db;
+     db.EmplaceBack("A", "X", 2000, Genre::Fiction, 4.1, 120);
+     db.EmplaceBack("B", "X", 2001, Genre::Fiction, 4.2, 130);
+     db.EmplaceBack("C", "Y", 2002, Genre::Fiction, 4.3, 140);
+     auto hist = buildAuthorHistogramFlat(db);
+     EXPECT_EQ(hist["X"], 2u);
+     EXPECT_EQ(hist["Y"], 1u);
 }
 
 TEST(StatsAPI, CalculateAverageRating_Smoke) {
     GTEST_SKIP() << "Enable when calculateAverageRating(...) is implemented.";
-    // using namespace bookdb;
-    // BookDatabase db;
-    // db.EmplaceBack("A", "X", 2000, Genre::Fiction, 5.0, 120);
-    // db.EmplaceBack("B", "Y", 2001, Genre::Fiction, 3.0, 130);
-    // double avg = calculateAverageRating(db);
-    // EXPECT_NEAR(avg, 4.0, 1e-12);
+     using namespace bookdb;
+     BookDatabase db;
+     db.EmplaceBack("A", "X", 2000, Genre::Fiction, 5.0, 120);
+     db.EmplaceBack("B", "Y", 2001, Genre::Fiction, 3.0, 130);
+     double avg = calculateAverageRating(db);
+     EXPECT_NEAR(avg, 4.0, 1e-12);
 }
 
 TEST(StatsAPI, CalculateGenreRatings_Smoke) {
     GTEST_SKIP() << "Enable when calculateGenreRatings(...) is implemented.";
-    // using namespace bookdb;
-    // BookDatabase db;
-    // db.EmplaceBack("A", "X", 2000, Genre::Fiction, 4.0, 120);
-    // db.EmplaceBack("B", "Y", 2001, Genre::SciFi,   5.0, 130);
-    // db.EmplaceBack("C", "Z", 2002, Genre::SciFi,   3.0, 140);
-    // auto per_genre = calculateGenreRatings(db);
-    // EXPECT_NEAR(per_genre[Genre::Fiction], 4.0, 1e-12);
-    // EXPECT_NEAR(per_genre[Genre::SciFi],   4.0, 1e-12);
+     using namespace bookdb;
+     BookDatabase db;
+     db.EmplaceBack("A", "X", 2000, Genre::Fiction, 4.0, 120);
+     db.EmplaceBack("B", "Y", 2001, Genre::SciFi,   5.0, 130);
+     db.EmplaceBack("C", "Z", 2002, Genre::SciFi,   3.0, 140);
+     auto per_genre = calculateGenreRatings(db.begin(), db.end());
+     EXPECT_NEAR(per_genre[Genre::Fiction], 4.0, 1e-12);
+     EXPECT_NEAR(per_genre[Genre::SciFi],   4.0, 1e-12);
 }
 
 TEST(StatsAPI, SampleRandomBooks_Smoke) {
     GTEST_SKIP() << "Enable when sampleRandomBooks(...) is implemented.";
-    // using namespace bookdb;
-    // BookDatabase db;
-    // for (int i = 0; i < 10; ++i)
-    //     db.EmplaceBack("T"+std::to_string(i), "A", 2000+i, Genre::Fiction, 4.0, 100+i);
-    // auto sample = sampleRandomBooks(db, 3);
-    // EXPECT_EQ(sample.size(), 3u);
-    // // sanity: items are from db (addresses match)
-    // for (auto& ref : sample) {
-    //     const Book* ptr = &ref.get();
-    //     bool found = std::any_of(db.begin(), db.end(), [&](const Book& b){ return &b == ptr; });
-    //     EXPECT_TRUE(found);
-    // }
+     using namespace bookdb;
+     BookDatabase db;
+     for (int i = 0; i < 10; ++i)
+         db.EmplaceBack("T"+std::to_string(i), "A", 2000+i, Genre::Fiction, 4.0, 100+i);
+     auto sample = sampleRandomBooks(db, 3);
+     EXPECT_EQ(sample.size(), 3u);
+     // sanity: items are from db (addresses match)
+     for (auto& ref : sample) {
+         const Book* ptr = &ref.get();
+         bool found = std::any_of(db.begin(), db.end(), [&](const Book& b){ return &b == ptr; });
+         EXPECT_TRUE(found);
+     }
 }
 
 TEST(StatsAPI, GetTopNBy_Smoke) {
@@ -197,10 +178,9 @@ TEST(StatsAPI, GetTopNBy_Smoke) {
 }
 
 // db_test.cpp (add or replace the existing Stats test for genre ratings)
-#include "statsistics.hpp"  // make sure this include is present
+#include "statsistics.hpp"
 
 using namespace bookdb;
-// using namespace bookdb::stats;
 
 TEST(StatsAPI, CalculateGenreRatings_ReturnsAveragesPerPresentGenre) {
     BookDatabase db;
