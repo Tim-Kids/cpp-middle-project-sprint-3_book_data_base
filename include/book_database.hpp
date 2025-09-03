@@ -3,6 +3,7 @@
 #include <print>
 #include <string>
 #include <vector>
+#include <deque>
 #include <flat_map>
 #include <string_view>
 #include <unordered_set>
@@ -14,7 +15,7 @@
 
 namespace bookdb {
 
-template<BookContainerLike BookContainer = std::vector<Book>> class BookDatabase {
+template<BookContainerLike BookContainer = std::deque<Book>> class BookDatabase {
     public:
     using value_type      = typename BookContainer::value_type;
     using reference       = typename BookContainer::value_type&;
