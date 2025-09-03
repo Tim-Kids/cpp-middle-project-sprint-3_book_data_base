@@ -71,18 +71,14 @@ template<BookContainerLike BookContainer = std::deque<Book>> class BookDatabase 
 
     template<typename T = Book>
     void PushBack(T&& book) {
-        auto [it, success] = authors_.emplace(book.author);
-        if(success) {
-            book.author = *it;
-            books_.push_back(std::forward<T>(book));
-        }
+        auto [it, _] = authors_.emplace(book.author);
+        book.author = *it;
+        books_.push_back(std::forward<T>(book));
     }
 
     void EmplaceBack(std::string_view title, std::string_view author, int year, Genre genre, double rating, int pages) {
-        auto [it, success] = authors_.emplace(author);
-        if(success) {
-            books_.emplace_back(std::string {title}, author, year, genre, rating, pages);
-        }
+        auto [it, _] = authors_.emplace(author);
+        books_.emplace_back(std::string {title}, *it, year, genre, rating, pages);
     }
 
     std::span<const Book> GetBooks() const {
