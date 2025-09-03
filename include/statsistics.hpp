@@ -47,10 +47,18 @@ template<BookContainerLike Cont> auto calculateAverageRating(const Cont& cont) {
     return totalRating / static_cast<double>(cont.size());
 }
 
-template<BookContainerLike Cont> auto sampleRandomBooks(Cont& cont, size_t num) {
-    std::vector<std::reference_wrapper<Book>> sample;
+template<BookContainerLike Cont>
+auto sampleRandomBooks(Cont& cont,
+                       size_t num) {  // Если передать const Cont&, то std::sample не скомпилируется.
+                                      // Вероятно "под капотом" алгоритм разыменовывает переданный ему итератор.
+    std::vector<std::reference_wrapper<const Book>> sample;
     sample.reserve(num);
     std::sample(cont.begin(), cont.end(), std::back_inserter(sample), num, std::mt19937 {std::random_device {}()});
     return sample;
+}
+
+template<BookContainerLike Cont, typename Comparator> auto getTopNBy(Cont& cont, size_t num, Comparator comp = {}) {
+    std::sort(cont.begin(), cont.end(), comp);
+    return std::vector<std::reference_wrapper<const Book>> {cont.cbegin(), std::next(cont.cbegin(), num)};
 }
 }  // namespace bookdb
