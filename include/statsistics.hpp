@@ -57,8 +57,12 @@ auto sampleRandomBooks(Cont& cont,
     return sample;
 }
 
-template<BookContainerLike Cont, typename Comparator> auto getTopNBy(Cont& cont, size_t num, Comparator comp = {}) {
+template<BookContainerLike Cont, typename Comparator>
+auto getTopNBy(Cont& cont, size_t num, Comparator comp = {}) {
     std::sort(cont.begin(), cont.end(), comp);
+    if(num >= cont.size()) {
+        return std::vector<std::reference_wrapper<const Book>> {cont.cbegin(), cont.cend()};
+    }
     return std::vector<std::reference_wrapper<const Book>> {cont.cbegin(), std::next(cont.cbegin(), num)};
 }
 }  // namespace bookdb

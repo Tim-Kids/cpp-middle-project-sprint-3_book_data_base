@@ -36,6 +36,9 @@ struct MoreByRating {
 
 struct MoreByPopularity {
     bool operator()(const Book& lhs, const Book& rhs) {
+        if(lhs.read_count == rhs.read_count) {
+            return lhs.title < rhs.title;
+        }
         return lhs.read_count > rhs.read_count;
     }
 };

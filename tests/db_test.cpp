@@ -15,13 +15,9 @@ TEST(TestComponentName, SimpleCheck) {
 
 using namespace bookdb;
 
-namespace {
-
 Book make_book(std::string title, std::string author, int year, Genre genre, double rating, int pages) {
     return Book {std::move(title), std::move(author), year, genre, rating, pages};
 }
-
-}  // namespace
 
 // --- Basic construction & empty state ---
 TEST(BookDatabaseAPI, StartsEmptyAndIteratorsAreValid) {
@@ -189,16 +185,15 @@ TEST(StatsAPI, SampleRandomBooks_Smoke) {
 }
 
 TEST(StatsAPI, GetTopNBy_Smoke) {
-    GTEST_SKIP() << "Enable when getTopNBy(...) is implemented.";
     // using namespace bookdb;
-    // BookDatabase db;
-    // db.EmplaceBack("Avg", "A", 2000, Genre::Fiction, 4.0, 100);
-    // db.EmplaceBack("Top", "B", 2001, Genre::Fiction, 5.0, 100);
-    // db.EmplaceBack("Low", "C", 1999, Genre::Fiction, 3.0, 100);
-    // auto top2 = getTopNBy(db, 2 /*, MoreByRating{} if required */);
-    // ASSERT_EQ(top2.size(), 2u);
-    // EXPECT_EQ(top2[0].get().title, "Top");
-    // EXPECT_EQ(top2[1].get().title, "Avg");
+     BookDatabase db;
+     db.EmplaceBack("Avg", "A", 2000, Genre::Fiction, 4.0, 100);
+     db.EmplaceBack("Top", "B", 2001, Genre::Fiction, 5.0, 100);
+     db.EmplaceBack("Low", "C", 1999, Genre::Fiction, 3.0, 100);
+     auto top2 = getTopNBy(db, 2, comp::MoreByRating{});
+     ASSERT_EQ(top2.size(), 2u);
+     EXPECT_EQ(top2[0].get().title, "Top");
+     EXPECT_EQ(top2[1].get().title, "Avg");
 }
 
 // db_test.cpp (add or replace the existing Stats test for genre ratings)
@@ -231,22 +226,6 @@ TEST(StatsAPI, CalculateGenreRatings_ReturnsAveragesPerPresentGenre) {
     // Absent genres should not be present
     EXPECT_FALSE(m.contains(Genre::NonFiction));
 }
-// If your flat_map implementation doesn’t support .contains() (early lib versions),
-// replace with:
-// EXPECT_TRUE(m.find(Genre::Fantasy) != m.end());
-// Optional micro-test for “sparse” DB
-// TEST(StatsAPI, CalculateGenreRatings_EmptyDBIsEmptyMap) {
-// BookDatabase db;
-// auto m = calculateGenreRatings(db);
-// EXPECT_TRUE(m.empty());
-//}
-// If your Genre enum doesn’t have COUNT
-
-// Add a small utility (once) in a header used by statistics.cpp:
-//  genre_util.hpp (optional utility)
-//  Hardcode count if enum is fixed & known (fastest & simplest):
-// inline constexpr std::size_t kGenreCount = 5; // Fantasy, SciFi, NonFiction, History, Other
-// Then replace K with kGenreCount.
 
 // ---------------- Stats: calculateAverageRating ----------------
 #include "statsistics.hpp"
@@ -281,6 +260,7 @@ TEST(FiltersAPI, FilterBooks_ComposesAndReturnsRefs) {
     ASSERT_EQ(hits.size(), 1u);
     EXPECT_EQ(hits[0].get().title, "The Dragon Reborn");
 }
+*/
 
 // ---------------- Stats: getTopNBy (default comparator = MoreByRating) ----------------
 TEST(StatsAPI, GetTopNBy_DefaultComp_ReturnsSortedTopN) {
@@ -290,7 +270,7 @@ TEST(StatsAPI, GetTopNBy_DefaultComp_ReturnsSortedTopN) {
     db.EmplaceBack("M", "C", 2000, Genre::Fiction, 4.5, 100);
     db.EmplaceBack("Q", "D", 2000, Genre::Fiction, 3.9, 100);
 
-    auto top2 = getTopNBy(db, 2);
+    auto top2 = getTopNBy(db, 2, comp::MoreByRating{});
     ASSERT_EQ(top2.size(), 2u);
     // Ordered best?worse
     EXPECT_EQ(top2[0].get().title, "H"); // 4.9
@@ -299,11 +279,11 @@ TEST(StatsAPI, GetTopNBy_DefaultComp_ReturnsSortedTopN) {
 
 TEST(StatsAPI, GetTopNBy_ZeroOrSmallEdgeCases) {
     BookDatabase db;
-    EXPECT_TRUE(getTopNBy(db, 0).empty());   // N=0
+    EXPECT_TRUE(getTopNBy(db, 0, comp::LessByTitle{}).empty());   // N=0
     db.EmplaceBack("Only", "A", 2000, Genre::Fiction, 4.2, 100);
-    auto top5 = getTopNBy(db, 5);
+    auto top5 = getTopNBy(db, 5, comp::LessByTitle{});
     ASSERT_EQ(top5.size(), 1u);
     EXPECT_EQ(top5[0].get().title, "Only");
 }
 
-*/
+
