@@ -34,28 +34,32 @@ int main() {
         db.EmplaceBack("The Hobbit", "J.R.R. Tolkien", 1937, Genre::Fiction, 4.9, 203);
         db.EmplaceBack("Lord of the Flies", "William Golding", 1954, Genre::Fiction, 4.2, 89);
     }
-    std::print("Books: {}\n\n", db);
+    std::print("Books:\n{}\n", db);
 
     // Sorts
     std::sort(db.begin(), db.end(), comp::LessByAuthor {});
-    std::print("Books sorted by author: {}\n\n==================\n", db);
+    std::print("Books sorted by author:\n{}\n\n==================\n", db);
 
     std::sort(db.begin(), db.end(), comp::LessByYear {});
-    std::print("Books sorted by author: {}\n\n==================\n", db);
+    std::print("Books sorted by author:\n{}\n\n==================\n", db);
 
     std::sort(db.begin(), db.end(), comp::MoreByPopularity {});
-    std::print("Books sorted by popularity: {}\n\n==================\n", db);
+    std::print("Books sorted by popularity:\n{}\n\n==================\n", db);
 
     // Author histogram
     auto histogram = buildAuthorHistogramFlat(db);
-    std::print("Author histogram:\n{}", histogram);
+    std::print("Author histogram:\n{}\n", histogram);
 
     // Ratings
     auto genreRatings = calculateGenreRatings(db.begin(), db.end());
-    std::print("\n\nAverage ratings by genres:\n{}", genreRatings);
+    std::print("\n\nAverage ratings by genres:\n{}\n", genreRatings);
 
     auto avrRating = calculateAverageRating(db);
-    std::print("Average books rating in library: {}\n", avrRating);
+    std::print("Average books rating in library:\n{}\n", avrRating);
+
+    // Random book's sample
+    auto sample = sampleRandomBooks(db, 3);
+    std::print("Sample {} books in library:\n{}\n", 3, sample);
 
     // Filters
     //    auto filtered = filterBooks(db.begin(), db.end(), all_of(YearBetween(1900, 1999), RatingAbove(4.5)));
@@ -69,7 +73,7 @@ int main() {
 
     auto orwellBookIt = std::find_if(db.begin(), db.end(), [](const auto& v) { return v.author == "George Orwell"; });
     if(orwellBookIt != db.end()) {
-                std::print("\n\nTransparent lookup by authors. Found Orwell's book: {}\n", *orwellBookIt);
+                std::print("Transparent lookup by authors. Found Orwell's book: {}\n", *orwellBookIt);
     }
 
     return 0;
