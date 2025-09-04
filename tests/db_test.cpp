@@ -46,9 +46,7 @@ TEST(BookDatabaseAPI, IteratorsAllowStdSort) {
     db.EmplaceBack("C", "B", 2000, Genre::Fiction, 4.1, 100);
     db.EmplaceBack("A", "C", 2001, Genre::Fiction, 4.2, 110);
     db.EmplaceBack("B", "A", 1999, Genre::Fiction, 4.3, 120);
-
     std::sort(db.begin(), db.end(), [](const Book& lhs, const Book& rhs) { return lhs.title < rhs.title; });
-
     auto it = db.begin();
     EXPECT_EQ(it->title, "A");
     ++it;
@@ -189,7 +187,6 @@ TEST(FiltersAPI, FilterBooks_ComposesAndReturnsRefs) {
     db.EmplaceBack("Dune", "Frank Herbert", 1965, Genre::SciFi, 4.2, 688);
     db.EmplaceBack("The Dragon Reborn", "Robert Jordan", 1991, Genre::Mystery, 4.6, 624);
     db.EmplaceBack("Sea Stories", "John Doe", 2018, Genre::Fiction, 3.7, 220);
-
     auto hits = filterBooks(db.begin(), db.end(), all_of(GenreIs(Genre::Mystery), RatingAbove(4.5)));
     ASSERT_EQ(hits.size(), 1u);
     EXPECT_EQ(hits[0].get().title, "The Dragon Reborn");

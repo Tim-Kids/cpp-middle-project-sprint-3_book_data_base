@@ -122,7 +122,7 @@ template<> struct formatter<bookdb::BookDatabase<std::vector<bookdb::Book>>> {
     }
 
     constexpr auto parse(format_parse_context& ctx) {
-        return ctx.begin();  // Просто игнорируем пользовательский формат
+        return ctx.begin();  // Просто игнорируем пользовательский формат.
     }
 };
 
