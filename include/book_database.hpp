@@ -66,7 +66,7 @@ template<BookContainerLike BookContainer = std::deque<Book>> class BookDatabase 
         return books_[id];
     }
 
-    const_reference operator[](size_t id) const {
+    const_reference operator[](size_t id) const noexcept {
         return books_[id];
     }
 
