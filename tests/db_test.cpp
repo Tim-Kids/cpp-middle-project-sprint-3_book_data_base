@@ -192,6 +192,89 @@ TEST(FiltersAPI, FilterBooks_ComposesAndReturnsRefs) {
     EXPECT_EQ(hits[0].get().title, "The Dragon Reborn");
 }
 
+Book B(std::string t, std::string a, int y, Genre g, double r, int p) {
+    return Book{std::move(t), std::move(a), y, g, r, p};
+}
+
+// --- all_of capture-by-value survival ---
+
+TEST(Filters_Combinators, AllOf_CapturesByValue_NoDangling) {
+    auto make_pred = [] {
+        // Создаем временные лямбды. Если any_of захватит их по ссылке, то тест провалится.
+        auto p1 = [x = 1](const Book&) noexcept { return x == 1; };
+        auto p2 = [y = 2](const Book&) noexcept { return y > 1; };
+        return all_of(p1, p2); // must copy/move into closure
+    };
+
+    auto pred = make_pred();
+
+    // Dummy book - поля не важны, т.к. предикат их не использует.
+    Book bk = B("T","A",2000, Genre::Fiction, 3.0, 100);
+
+    EXPECT_TRUE(pred(bk)); // Если будет dangle, то это UB/false/сrash.
+}
+
+// --- any_of short-circuit semantics ---
+
+TEST(Filters_Combinators, AnyOf_ShortCircuits_LeftToRight) {
+    std::atomic<int> counter{0};
+
+    auto always_true  = [&](const Book&) noexcept -> bool { return true; };
+    auto side_effect  = [&](const Book&) noexcept -> bool { counter.fetch_add(1); return true; };
+
+    auto pred = any_of(always_true, side_effect);
+
+    Book bk = B("T","A",2000, Genre::Fiction, 3.0, 100);
+    EXPECT_TRUE(pred(bk));
+    EXPECT_EQ(counter.load(), 0) << "any_of should short-circuit and not evaluate later predicates";
+}
+
+// --- filterBooks with single predicate ---
+
+TEST(Filters_FilterBooks, SinglePredicate_ReturnsRefsToMatches) {
+    std::vector<Book> v = {
+        B("A","X",1999, Genre::SciFi,     4.9, 300),
+        B("B","Y",2005, Genre::Fiction,   3.2, 120),
+        B("C","Z",2010, Genre::Biography, 4.3, 220),
+    };
+
+    auto res = filterBooks(v.begin(), v.end(), RatingAbove(4.0));
+    ASSERT_EQ(res.size(), 2u);
+    EXPECT_EQ(&res[0].get(), &v[0]);    // Один адрес, это сслыка - а не копия.
+    EXPECT_EQ(&res[1].get(), &v[2]);
+}
+
+// --- filterBooks with multiple predicates (variadic overload) ---
+
+TEST(Filters_FilterBooks, Variadic_Composition_AllOf) {
+    std::vector<Book> v = {
+        B("Dune","Frank Herbert",1965, Genre::SciFi,   4.2, 688),
+        B("Sea","John",          2018, Genre::Fiction, 3.7, 220),
+        B("Wheel","Jordan",      1991, Genre::Fiction, 4.6, 624),
+        B("Clean Code","Martin", 2008, Genre::NonFiction, 4.3, 464),
+    };
+
+    auto res = filterBooks(v.begin(), v.end(),
+                           YearBetween(1990, 2010),
+                           RatingAbove(4.0));
+    ASSERT_EQ(res.size(), 2u);
+    EXPECT_EQ(&res[0].get(), &v[2]); // 1991, 4.6
+    EXPECT_EQ(&res[1].get(), &v[3]); // 2008, 4.3
+}
+
+// --- any_of composition smoke ---
+
+TEST(Filters_Combinators, AnyOf_ComposesDifferentFactories) {
+    auto p = any_of(GenreIs(Genre::SciFi), RatingAbove(4.8));
+    Book a = B("X","Y",2000, Genre::SciFi,   3.0, 100);
+    Book b = B("Y","Z",2000, Genre::Fiction, 4.9, 100);
+    Book c = B("Z","Q",2000, Genre::Fiction, 3.1, 100);
+
+    EXPECT_TRUE(p(a));
+    EXPECT_TRUE(p(b));
+    EXPECT_FALSE(p(c));
+}
+
 // ---------------- Stats: getTopNBy (default comparator = MoreByRating) ----------------
 
 TEST(StatsAPI, GetTopNBy_DefaultComp_ReturnsSortedTopN) {
