@@ -1,12 +1,5 @@
 #include <gtest/gtest.h>
-
-TEST(TestComponentName, SimpleCheck) {
-    EXPECT_EQ(1 + 1, 2);
-}
-
-#include <gtest/gtest.h>
 #include <algorithm>
-#include <format>
 #include <string>
 #include <vector>
 
@@ -88,9 +81,8 @@ TEST(BookDatabaseAPI, OptionalViewsIfProvided) {
 #include "filters.hpp"
 #include "statsistics.hpp"
 
-TEST(FiltersAPI, Predicates_Composition_Smoke) {
+/*TEST(FiltersAPI, Predicates_Composition_Smoke) {
     GTEST_SKIP() << "Enable when filters predicates are implemented.";
-    // using namespace bookdb;
     // // If predicates live in bookdb namespace (per current headers):
     // auto by_year  = YearBetween(1990, 2010);
     // auto good     = RatingAbove(4.2);
@@ -101,11 +93,10 @@ TEST(FiltersAPI, Predicates_Composition_Smoke) {
     // db.EmplaceBack("B", "Au", 1985, Genre::Fiction, 4.9, 300);
     // int hits = std::count_if(db.begin(), db.end(), combo);
     // EXPECT_EQ(hits, 1);
-}
+}*/
 
-TEST(FiltersAPI, FilterBooks_Helper_ReturnsMatches) {
+/*TEST(FiltersAPI, FilterBooks_Helper_ReturnsMatches) {
     GTEST_SKIP() << "Enable when filterBooks(It,It,Pred) is implemented.";
-    // using namespace bookdb;
     // BookDatabase db;
     // db.EmplaceBack("Dune", "Frank Herbert", 1965, Genre::SciFi, 4.2, 688);
     // db.EmplaceBack("Sea", "John", 2018, Genre::Adventure, 3.7, 220);
@@ -113,11 +104,9 @@ TEST(FiltersAPI, FilterBooks_Helper_ReturnsMatches) {
     // auto matches = filterBooks(db.begin(), db.end(), p);
     // ASSERT_EQ(matches.size(), 1u);
     // EXPECT_EQ(matches[0].get().title, "Dune");
-}
+}*/
 
 TEST(StatsAPI, BuildAuthorHistogramFlat_Smoke) {
-    GTEST_SKIP() << "Enable when buildAuthorHistogramFlat(...) is implemented.";
-     using namespace bookdb;
      BookDatabase db;
      db.EmplaceBack("A", "X", 2000, Genre::Fiction, 4.1, 120);
      db.EmplaceBack("B", "X", 2001, Genre::Fiction, 4.2, 130);
@@ -128,8 +117,6 @@ TEST(StatsAPI, BuildAuthorHistogramFlat_Smoke) {
 }
 
 TEST(StatsAPI, CalculateAverageRating_Smoke) {
-    GTEST_SKIP() << "Enable when calculateAverageRating(...) is implemented.";
-     using namespace bookdb;
      BookDatabase db;
      db.EmplaceBack("A", "X", 2000, Genre::Fiction, 5.0, 120);
      db.EmplaceBack("B", "Y", 2001, Genre::Fiction, 3.0, 130);
@@ -138,8 +125,6 @@ TEST(StatsAPI, CalculateAverageRating_Smoke) {
 }
 
 TEST(StatsAPI, CalculateGenreRatings_Smoke) {
-    GTEST_SKIP() << "Enable when calculateGenreRatings(...) is implemented.";
-     using namespace bookdb;
      BookDatabase db;
      db.EmplaceBack("A", "X", 2000, Genre::Fiction, 4.0, 120);
      db.EmplaceBack("B", "Y", 2001, Genre::SciFi,   5.0, 130);
@@ -150,14 +135,11 @@ TEST(StatsAPI, CalculateGenreRatings_Smoke) {
 }
 
 TEST(StatsAPI, SampleRandomBooks_Smoke) {
-    GTEST_SKIP() << "Enable when sampleRandomBooks(...) is implemented.";
-     using namespace bookdb;
      BookDatabase db;
      for (int i = 0; i < 10; ++i)
          db.EmplaceBack("T"+std::to_string(i), "A", 2000+i, Genre::Fiction, 4.0, 100+i);
      auto sample = sampleRandomBooks(db, 3);
      EXPECT_EQ(sample.size(), 3u);
-     // sanity: items are from db (addresses match)
      for (auto& ref : sample) {
          const Book* ptr = &ref.get();
          bool found = std::any_of(db.begin(), db.end(), [&](const Book& b){ return &b == ptr; });
@@ -166,7 +148,6 @@ TEST(StatsAPI, SampleRandomBooks_Smoke) {
 }
 
 TEST(StatsAPI, GetTopNBy_Smoke) {
-    // using namespace bookdb;
      BookDatabase db;
      db.EmplaceBack("Avg", "A", 2000, Genre::Fiction, 4.0, 100);
      db.EmplaceBack("Top", "B", 2001, Genre::Fiction, 5.0, 100);
@@ -177,10 +158,7 @@ TEST(StatsAPI, GetTopNBy_Smoke) {
      EXPECT_EQ(top2[1].get().title, "Avg");
 }
 
-// db_test.cpp (add or replace the existing Stats test for genre ratings)
-#include "statsistics.hpp"
 
-using namespace bookdb;
 
 TEST(StatsAPI, CalculateGenreRatings_ReturnsAveragesPerPresentGenre) {
     BookDatabase db;
@@ -208,7 +186,6 @@ TEST(StatsAPI, CalculateGenreRatings_ReturnsAveragesPerPresentGenre) {
 }
 
 // ---------------- Stats: calculateAverageRating ----------------
-#include "statsistics.hpp"
 
 TEST(StatsAPI, CalculateAverageRatingEmptyIsZero) {
     BookDatabase db;
