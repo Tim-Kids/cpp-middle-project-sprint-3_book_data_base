@@ -73,8 +73,8 @@ TEST(BookDatabaseAPI, CanFindAuthorWithStdAlgorithms) {
 TEST(BookDatabaseAPI, OptionalViewsIfProvided) {
     BookDatabase db;
     db.EmplaceBack("Dune", "Frank Herbert", 1965, Genre::SciFi, 4.2, 688);
-     auto books_view = db.GetBooks();
-     EXPECT_GE(books_view.size(), 1u);
+    auto books_view = db.GetBooks();
+    EXPECT_GE(books_view.get().size(), 1u);
 }
 
 // ================= Additional tests: Filters & Statistics =================
@@ -107,58 +107,57 @@ TEST(BookDatabaseAPI, OptionalViewsIfProvided) {
 }*/
 
 TEST(StatsAPI, BuildAuthorHistogramFlat_Smoke) {
-     BookDatabase db;
-     db.EmplaceBack("A", "X", 2000, Genre::Fiction, 4.1, 120);
-     db.EmplaceBack("B", "X", 2001, Genre::Fiction, 4.2, 130);
-     db.EmplaceBack("C", "Y", 2002, Genre::Fiction, 4.3, 140);
-     auto hist = buildAuthorHistogramFlat(db);
-     EXPECT_EQ(hist["X"], 2u);
-     EXPECT_EQ(hist["Y"], 1u);
+    BookDatabase db;
+    db.EmplaceBack("A", "X", 2000, Genre::Fiction, 4.1, 120);
+    db.EmplaceBack("B", "X", 2001, Genre::Fiction, 4.2, 130);
+    db.EmplaceBack("C", "Y", 2002, Genre::Fiction, 4.3, 140);
+    auto hist = buildAuthorHistogramFlat(db);
+    EXPECT_EQ(hist["X"], 2u);
+    EXPECT_EQ(hist["Y"], 1u);
 }
 
 TEST(StatsAPI, CalculateAverageRating_Smoke) {
-     BookDatabase db;
-     db.EmplaceBack("A", "X", 2000, Genre::Fiction, 5.0, 120);
-     db.EmplaceBack("B", "Y", 2001, Genre::Fiction, 3.0, 130);
-     double avg = calculateAverageRating(db);
-     EXPECT_NEAR(avg, 4.0, 1e-12);
+    BookDatabase db;
+    db.EmplaceBack("A", "X", 2000, Genre::Fiction, 5.0, 120);
+    db.EmplaceBack("B", "Y", 2001, Genre::Fiction, 3.0, 130);
+    double avg = calculateAverageRating(db);
+    EXPECT_NEAR(avg, 4.0, 1e-12);
 }
 
 TEST(StatsAPI, CalculateGenreRatings_Smoke) {
-     BookDatabase db;
-     db.EmplaceBack("A", "X", 2000, Genre::Fiction, 4.0, 120);
-     db.EmplaceBack("B", "Y", 2001, Genre::SciFi,   5.0, 130);
-     db.EmplaceBack("C", "Z", 2002, Genre::SciFi,   3.0, 140);
-     auto per_genre = calculateGenreRatings(db.begin(), db.end());
-     EXPECT_NEAR(per_genre[Genre::Fiction], 4.0, 1e-12);
-     EXPECT_NEAR(per_genre[Genre::SciFi],   4.0, 1e-12);
+    BookDatabase db;
+    db.EmplaceBack("A", "X", 2000, Genre::Fiction, 4.0, 120);
+    db.EmplaceBack("B", "Y", 2001, Genre::SciFi, 5.0, 130);
+    db.EmplaceBack("C", "Z", 2002, Genre::SciFi, 3.0, 140);
+    auto per_genre = calculateGenreRatings(db.begin(), db.end());
+    EXPECT_NEAR(per_genre[Genre::Fiction], 4.0, 1e-12);
+    EXPECT_NEAR(per_genre[Genre::SciFi], 4.0, 1e-12);
 }
 
 TEST(StatsAPI, SampleRandomBooks_Smoke) {
-     BookDatabase db;
-     for (int i = 0; i < 10; ++i)
-         db.EmplaceBack("T"+std::to_string(i), "A", 2000+i, Genre::Fiction, 4.0, 100+i);
-     auto sample = sampleRandomBooks(db, 3);
-     EXPECT_EQ(sample.size(), 3u);
-     for (auto& ref : sample) {
-         const Book* ptr = &ref.get();
-         bool found = std::any_of(db.begin(), db.end(), [&](const Book& b){ return &b == ptr; });
-         EXPECT_TRUE(found);
-     }
+    BookDatabase db;
+    for(int i = 0; i < 10; ++i) {
+        db.EmplaceBack("T" + std::to_string(i), "A", 2000 + i, Genre::Fiction, 4.0, 100 + i);
+    }
+    auto sample = sampleRandomBooks(db, 3);
+    EXPECT_EQ(sample.size(), 3u);
+    for(auto& ref: sample) {
+        const Book* ptr = &ref.get();
+        bool found      = std::any_of(db.begin(), db.end(), [&](const Book& b) { return &b == ptr; });
+        EXPECT_TRUE(found);
+    }
 }
 
 TEST(StatsAPI, GetTopNBy_Smoke) {
-     BookDatabase db;
-     db.EmplaceBack("Avg", "A", 2000, Genre::Fiction, 4.0, 100);
-     db.EmplaceBack("Top", "B", 2001, Genre::Fiction, 5.0, 100);
-     db.EmplaceBack("Low", "C", 1999, Genre::Fiction, 3.0, 100);
-     auto top2 = getTopNBy(db, 2, comp::MoreByRating{});
-     ASSERT_EQ(top2.size(), 2u);
-     EXPECT_EQ(top2[0].get().title, "Top");
-     EXPECT_EQ(top2[1].get().title, "Avg");
+    BookDatabase db;
+    db.EmplaceBack("Avg", "A", 2000, Genre::Fiction, 4.0, 100);
+    db.EmplaceBack("Top", "B", 2001, Genre::Fiction, 5.0, 100);
+    db.EmplaceBack("Low", "C", 1999, Genre::Fiction, 3.0, 100);
+    auto top2 = getTopNBy(db, 2, comp::MoreByRating {});
+    ASSERT_EQ(top2.size(), 2u);
+    EXPECT_EQ(top2[0].get().title, "Top");
+    EXPECT_EQ(top2[1].get().title, "Avg");
 }
-
-
 
 TEST(StatsAPI, CalculateGenreRatings_ReturnsAveragesPerPresentGenre) {
     BookDatabase db;
@@ -227,20 +226,18 @@ TEST(StatsAPI, GetTopNBy_DefaultComp_ReturnsSortedTopN) {
     db.EmplaceBack("M", "C", 2000, Genre::Fiction, 4.5, 100);
     db.EmplaceBack("Q", "D", 2000, Genre::Fiction, 3.9, 100);
 
-    auto top2 = getTopNBy(db, 2, comp::MoreByRating{});
+    auto top2 = getTopNBy(db, 2, comp::MoreByRating {});
     ASSERT_EQ(top2.size(), 2u);
     // Ordered best?worse
-    EXPECT_EQ(top2[0].get().title, "H"); // 4.9
-    EXPECT_EQ(top2[1].get().title, "M"); // 4.5
+    EXPECT_EQ(top2[0].get().title, "H");  // 4.9
+    EXPECT_EQ(top2[1].get().title, "M");  // 4.5
 }
 
 TEST(StatsAPI, GetTopNBy_ZeroOrSmallEdgeCases) {
     BookDatabase db;
-    EXPECT_TRUE(getTopNBy(db, 0, comp::LessByTitle{}).empty());   // N=0
+    EXPECT_TRUE(getTopNBy(db, 0, comp::LessByTitle {}).empty());  // N=0
     db.EmplaceBack("Only", "A", 2000, Genre::Fiction, 4.2, 100);
-    auto top5 = getTopNBy(db, 5, comp::LessByTitle{});
+    auto top5 = getTopNBy(db, 5, comp::LessByTitle {});
     ASSERT_EQ(top5.size(), 1u);
     EXPECT_EQ(top5[0].get().title, "Only");
 }
-
-
