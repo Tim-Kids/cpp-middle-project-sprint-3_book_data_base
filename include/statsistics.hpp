@@ -23,8 +23,7 @@ auto buildAuthorHistogramFlat(const Cont& cont, Comparator comp = {}) {
     return authorHistogram;
 }
 
-template<BookIterator It>
-auto calculateGenreRatings(It begin, It end) {
+template<BookIterator It> auto calculateGenreRatings(It begin, It end) {
     std::flat_map<Genre, std::pair<double, unsigned short>> genreToRatingAndCount {};
     std::for_each(begin, end, [&](const auto& book) {
         genreToRatingAndCount[const_cast<Book&>(book).genre].first += book.rating;
@@ -49,15 +48,15 @@ template<BookContainerLike Cont> auto calculateAverageRating(const Cont& cont) {
 template<BookContainerLike Cont>
 auto sampleRandomBooks(Cont& cont,
                        size_t num) {  // Если передать const Cont&, то std::sample не скомпилируется.
-                                      // Вероятно "под капотом" алгоритм разыменовывает переданный ему итератор.
+                                      // Вероятно "под капотом" алгоритм разыменовывает переданный ему итератор, что
+                                      // запрещено квалификатором.
     std::vector<std::reference_wrapper<const Book>> sample;
     sample.reserve(num);
     std::sample(cont.begin(), cont.end(), std::back_inserter(sample), num, std::mt19937 {std::random_device {}()});
     return sample;
 }
 
-template<BookContainerLike Cont, typename Comparator>
-auto getTopNBy(Cont& cont, size_t num, Comparator comp = {}) {
+template<BookContainerLike Cont, typename Comparator> auto getTopNBy(Cont& cont, size_t num, Comparator comp = {}) {
     std::sort(cont.begin(), cont.end(), comp);
     if(num >= cont.size()) {
         return std::vector<std::reference_wrapper<const Book>> {cont.cbegin(), cont.cend()};
