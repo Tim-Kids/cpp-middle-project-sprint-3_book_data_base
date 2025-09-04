@@ -23,8 +23,7 @@ auto buildAuthorHistogramFlat(const Cont& cont, Comparator comp = {}) {
     return authorHistogram;
 }
 
-template<typename It>
-    requires BookIterator<It>
+template<BookIterator It>
 auto calculateGenreRatings(It begin, It end) {
     std::flat_map<Genre, std::pair<double, unsigned short>> genreToRatingAndCount {};
     std::for_each(begin, end, [&](const auto& book) {
