@@ -2,7 +2,7 @@
 
 #include <print>
 #include <string>
-//#include <vector>
+#include <vector>
 #include <deque>
 #include <flat_map>
 #include <string_view>
@@ -15,8 +15,7 @@
 
 namespace bookdb {
 
-template<BookContainerLike BookContainer = std::deque<Book>>
-class BookDatabase {
+template<BookContainerLike BookContainer = std::deque<Book>> class BookDatabase {
     public:
     using value_type      = typename BookContainer::value_type;
     using reference       = typename BookContainer::value_type&;
@@ -38,31 +37,31 @@ class BookDatabase {
         });
     }
 
-    iterator begin() {
+    iterator begin() noexcept {
         return books_.begin();
     }
 
-    const_iterator cbegin() const {
+    const_iterator cbegin() const noexcept {
         return books_.cbegin();
     }
 
-    iterator end() {
+    iterator end() noexcept {
         return books_.end();
     }
 
-    const_iterator cend() const {
+    const_iterator cend() const noexcept {
         return books_.cend();
     }
 
-    size_type size() const {
+    size_type size() const noexcept {
         return books_.size();
     }
 
-    bool empty() const {
+    bool empty() const noexcept {
         return books_.empty();
     }
 
-    reference operator[](size_t id) {
+    reference operator[](size_t id) noexcept {
         return books_[id];
     }
 
@@ -81,7 +80,7 @@ class BookDatabase {
         books_.emplace_back(std::string {title}, *it, year, genre, rating, pages);
     }
 
-    auto GetBooks() const {
+    auto GetBooks() const noexcept {
         if constexpr(std::same_as<BookContainer, std::vector<Book>>) {
             return std::span {books_.data(), books_.size()};
         }
@@ -90,11 +89,11 @@ class BookDatabase {
         }
     }
 
-    auto& GetAuthors() const {
+    auto& GetAuthors() const noexcept {
         return authors_;
     }
 
-    void Clear() {
+    void Clear() noexcept {
         books_.clear();
         authors_.clear();
     }
