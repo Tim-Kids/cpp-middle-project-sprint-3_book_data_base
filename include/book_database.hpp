@@ -2,7 +2,7 @@
 
 #include <print>
 #include <string>
-#include <vector>
+//#include <vector>
 #include <deque>
 #include <flat_map>
 #include <string_view>
@@ -15,7 +15,8 @@
 
 namespace bookdb {
 
-template<BookContainerLike BookContainer = std::vector<Book>> class BookDatabase {
+template<BookContainerLike BookContainer = std::deque<Book>>
+class BookDatabase {
     public:
     using value_type      = typename BookContainer::value_type;
     using reference       = typename BookContainer::value_type&;
@@ -81,7 +82,12 @@ template<BookContainerLike BookContainer = std::vector<Book>> class BookDatabase
     }
 
     auto GetBooks() const {
-        return std::span{books_.data(), books_.size()};
+        if constexpr(std::same_as<BookContainer, std::vector<Book>>) {
+            return std::span {books_.data(), books_.size()};
+        }
+        else {
+            return std::ref(books_);
+        }
     }
 
     auto& GetAuthors() const {
@@ -104,6 +110,26 @@ namespace std {
 template<> struct formatter<bookdb::BookDatabase<std::vector<bookdb::Book>>> {
     template<typename FormatContext>
     auto format(const bookdb::BookDatabase<std::vector<bookdb::Book>>& db, FormatContext& fc) const {
+        format_to(fc.out(), "BookDatabase (size = {}): ", db.size());
+        format_to(fc.out(), "Books:\n");
+        for(const bookdb::Book& book: db.GetBooks()) {
+            format_to(fc.out(), "- {}\n", book);
+        }
+        format_to(fc.out(), "Authors:\n");
+        for(const auto& author: db.GetAuthors()) {
+            format_to(fc.out(), "- {}\n", author);
+        }
+        return fc.out();
+    }
+
+    constexpr auto parse(format_parse_context& ctx) {
+        return ctx.begin();  // Просто игнорируем пользовательский формат
+    }
+};
+
+template<> struct formatter<bookdb::BookDatabase<std::deque<bookdb::Book>>> {
+    template<typename FormatContext>
+    auto format(const bookdb::BookDatabase<std::deque<bookdb::Book>>& db, FormatContext& fc) const {
         format_to(fc.out(), "BookDatabase (size = {}): ", db.size());
         format_to(fc.out(), "Books:\n");
         for(const bookdb::Book& book: db.GetBooks()) {
