@@ -71,7 +71,7 @@ TEST(BookDatabaseAPI, OptionalViewsIfProvided) {
     BookDatabase db;
     db.EmplaceBack("Dune", "Frank Herbert", 1965, Genre::SciFi, 4.2, 688);
     auto books_view = db.GetBooks();
-    EXPECT_GE(books_view.get().size(), 1u);
+    EXPECT_GE(books_view.size(), 1u);
 }
 
 // ================= Additional tests: Filters & Statistics =================

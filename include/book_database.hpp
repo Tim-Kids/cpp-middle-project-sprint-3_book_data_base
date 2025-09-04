@@ -1,13 +1,14 @@
 #pragma once
 
+#include <span>
 #include <print>
 #include <string>
 #include <vector>
 #include <deque>
 #include <flat_map>
+#include <algorithm>
 #include <string_view>
 #include <unordered_set>
-#include <boost/container/flat_set.hpp>
 
 #include "book.hpp"
 #include "concepts.hpp"
@@ -20,20 +21,20 @@ template<BookContainerLike BookContainer = std::deque<Book>> class BookDatabase 
     using value_type      = typename BookContainer::value_type;
     using reference       = typename BookContainer::value_type&;
     using const_reference = const typename BookContainer::value_type&;
-    using difference_type = typename std::ptrdiff_t;
+    using difference_type = std::ptrdiff_t;
     using iterator        = typename BookContainer::iterator;
     using const_iterator  = typename BookContainer::const_iterator;
     using size_type       = std::size_t;
 
-    using AuthorContainer = std::unordered_set<std::string, TransparentStringHash>;
+    using AuthorContainer = std::unordered_set<std::string, TransparentStringHash, TransparentStringEqual>;
 
     BookDatabase() = default;
 
     template<typename T> constexpr BookDatabase(std::initializer_list<T> books) {
         std::for_each(books.begin(), books.end(), [&](auto&& book) {
-            auto [it, _] = authors_.emplace(books.author);
+            auto [it, _] = authors_.emplace(book.author);
             book.author  = *it;
-            books_.push_back(std::forward<Book>(book));
+            books_.push_back(std::forward<T>(book));
         });
     }
 
@@ -66,7 +67,7 @@ template<BookContainerLike BookContainer = std::deque<Book>> class BookDatabase 
     }
 
     const_reference operator[](size_t id) const {
-        return books_.at(id);
+        return books_[id];
     }
 
     template<typename T = Book> void PushBack(T&& book) {
@@ -82,10 +83,10 @@ template<BookContainerLike BookContainer = std::deque<Book>> class BookDatabase 
 
     auto GetBooks() const noexcept {
         if constexpr(std::same_as<BookContainer, std::vector<Book>>) {
-            return std::span {books_.data(), books_.size()};
+            return std::span<const Book> {books_.data(), books_.size()};
         }
         else {
-            return std::ref(books_);
+            return static_cast<const BookContainer&>(books_);
         }
     }
 
