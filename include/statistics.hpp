@@ -76,11 +76,17 @@ auto getTopNBy(const Cont& cont, size_t num, Comparator comp = {}) {
         return std::vector<Ref>{};
     }
     if(topN.size() > num) {
-        auto nth = topN.begin() + static_cast<std::ptrdiff_t>(num);
-        std::nth_element(topN.begin(), nth, topN.end(), comp);
+        auto nth = std::next(topN.begin(), num);
+        std::nth_element(topN.begin(), nth, topN.end(),
+                         [&](const Ref& a, const Ref& b) {
+                             return comp(a.get(), b.get());
+                         });
         topN.erase(nth, topN.end());
     }
-    std::sort(topN.begin(), topN.end(), comp);
+    std::sort(topN.begin(), topN.end(),
+              [&](const Ref& a, const Ref& b) {
+                  return comp(a.get(), b.get());
+              });
     return topN;
 }
 } // namespace bookdb
