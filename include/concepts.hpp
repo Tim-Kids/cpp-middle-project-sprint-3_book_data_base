@@ -33,6 +33,6 @@ concept BookPredicate = std::predicate<Pred, const T&>;  // Проверит, ч
 template<typename Comp, typename T = Book>
 concept BookComparator =
     std::predicate<Comp, const T&, const T&>;  // Проверит, что тип Comp принимает два аргумента типа const T& и
-                                               // возвращает значение, которое можно рпивести к bool.
+                                               // возвращает значение, которое можно привести к bool.
 
 }  // namespace bookdb

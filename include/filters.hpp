@@ -32,15 +32,15 @@ template<BookPredicate... Predicate> auto all_of(Predicate&&... pred) {
     };
 }
 
-template<BookPredicate... Predicate> auto any_of(Predicate... pred) {
+template<BookPredicate... Predicate> auto any_of(Predicate&&... pred) {
     return [&](const Book& book) noexcept {
         return (std::forward<Predicate>(pred)(book) || ...);
     };
 }
 
-template<BookIterator It, typename Predicate> auto filterBooks(It begin, It end, Predicate pred) {
+template<BookIterator It, typename Predicate> auto filterBooks(It begin, It end, Predicate&& pred) {
     std::vector<std::reference_wrapper<const Book>> filtered {};
-    std::copy_if(begin, end, std::back_inserter(filtered), pred);
+    std::copy_if(begin, end, std::back_inserter(filtered), std::forward<Predicate>(pred));
     return filtered;
 }
 }  // namespace bookdb

@@ -56,14 +56,13 @@ constexpr std::string StringFromGenre(Genre g) {
 
 struct Book {
     std::string title;
-    std::string_view author;  // Ссылаемся на оригиналы строк в конетйнере AuthorContainer. Экономим память.
+    std::string_view author;  // Экономия памяти - ссылаемся на оригиналы строк в AuthorContainer.
 
     int year;
     Genre genre;
     double rating;
     int read_count;
 
-    // Ваш код для конструкторов здесь
     explicit constexpr Book(std::string title, std::string_view author, int year, Genre genre, double rating,
                             int read_count):
         title(std::move(title)),
@@ -117,18 +116,17 @@ template<> struct formatter<bookdb::Genre, char> {
     }
 
     constexpr auto parse(format_parse_context& ctx) {
-        return ctx.begin();  // Просто игнорируем пользовательский формат
+        return ctx.begin();
     }
 };
 
-// Ваш код для std::formatter<Book> здесь
 template<> struct formatter<bookdb::Book, char> {
     template<typename FormatContext> auto format(const bookdb::Book& book, FormatContext& fc) const {
         return format_to(fc.out(), "{}", book.title);
     }
 
     constexpr auto parse(format_parse_context& ctx) {
-        return ctx.begin();  // Просто игнорируем пользовательский формат
+        return ctx.begin();
     }
 };
 

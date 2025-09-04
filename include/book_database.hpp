@@ -142,7 +142,7 @@ template<> struct formatter<bookdb::BookDatabase<std::deque<bookdb::Book>>> {
     }
 
     constexpr auto parse(format_parse_context& ctx) {
-        return ctx.begin();  // Просто игнорируем пользовательский формат
+        return ctx.begin();
     }
 };
 
@@ -157,7 +157,7 @@ template<> struct formatter<std::flat_map<std::string_view, unsigned short int, 
     }
 
     constexpr auto parse(format_parse_context& ctx) {
-        return ctx.begin();  // Просто игнорируем пользовательский формат
+        return ctx.begin();
     }
 };
 
@@ -171,7 +171,7 @@ template<> struct formatter<std::flat_map<bookdb::Genre, double>> {
     }
 
     constexpr auto parse(format_parse_context& ctx) {
-        return ctx.begin();  // Просто игнорируем пользовательский формат
+        return ctx.begin();
     }
 };
 
@@ -185,7 +185,7 @@ template<> struct formatter<std::vector<std::reference_wrapper<const bookdb::Boo
     }
 
     constexpr auto parse(format_parse_context& ctx) {
-        return ctx.begin();  // Просто игнорируем пользовательский формат
+        return ctx.begin();
     }
 };
 
