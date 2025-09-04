@@ -13,8 +13,6 @@ concept BookContainerLike = requires(Cont c) {
     typename Cont::value_type;
     { c.begin() } -> std::same_as<typename Cont::iterator>;
     { c.end() } -> std::same_as<typename Cont::iterator>;
-    { c.cbegin() } -> std::same_as<typename Cont::const_iterator>;
-    { c.cend() } -> std::same_as<typename Cont::const_iterator>;
     { c.size() } -> std::same_as<size_t>;
     { c.empty() } -> std::same_as<bool>;
 };

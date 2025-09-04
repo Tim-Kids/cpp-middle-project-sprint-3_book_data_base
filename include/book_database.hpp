@@ -30,11 +30,11 @@ template<BookContainerLike BookContainer = std::deque<Book>> class BookDatabase 
 
     BookDatabase() = default;
 
-    template<typename T> constexpr BookDatabase(std::initializer_list<T> books) {
-        std::for_each(books.begin(), books.end(), [&](auto&& book) {
+    constexpr BookDatabase(std::initializer_list<Book> books) {
+        std::for_each(books.begin(), books.end(), [&](auto book) {
             auto [it, _] = authors_.emplace(book.author);
             book.author  = *it;
-            books_.push_back(std::forward<T>(book));
+            books_.push_back(std::move(book));
         });
     }
 
@@ -42,7 +42,7 @@ template<BookContainerLike BookContainer = std::deque<Book>> class BookDatabase 
         return books_.begin();
     }
 
-    const_iterator cbegin() const noexcept {
+    const_iterator begin() const noexcept {
         return books_.cbegin();
     }
 
@@ -50,7 +50,7 @@ template<BookContainerLike BookContainer = std::deque<Book>> class BookDatabase 
         return books_.end();
     }
 
-    const_iterator cend() const noexcept {
+    const_iterator end() const noexcept {
         return books_.cend();
     }
 
@@ -78,12 +78,12 @@ template<BookContainerLike BookContainer = std::deque<Book>> class BookDatabase 
 
     void EmplaceBack(std::string_view title, std::string_view author, int year, Genre genre, double rating, int pages) {
         auto [it, _] = authors_.emplace(author);
-        books_.emplace_back(std::string {title}, *it, year, genre, rating, pages);
+        books_.emplace_back(std::string{title}, *it, year, genre, rating, pages);
     }
 
     auto GetBooks() const noexcept {
         if constexpr(std::same_as<BookContainer, std::vector<Book>>) {
-            return std::span<const Book> {books_.data(), books_.size()};
+            return std::span<const Book>{books_.data(), books_.size()};
         }
         else {
             return static_cast<const BookContainer&>(books_);
@@ -101,10 +101,10 @@ template<BookContainerLike BookContainer = std::deque<Book>> class BookDatabase 
 
     private:
     BookContainer books_;
-    AuthorContainer authors_;  // Хранит оригиналы строк.
+    AuthorContainer authors_; // Хранит оригиналы строк.
 };
 
-}  // namespace bookdb
+} // namespace bookdb
 
 namespace std {
 template<> struct formatter<bookdb::BookDatabase<std::vector<bookdb::Book>>> {
@@ -123,7 +123,7 @@ template<> struct formatter<bookdb::BookDatabase<std::vector<bookdb::Book>>> {
     }
 
     constexpr auto parse(format_parse_context& ctx) {
-        return ctx.begin();  // Просто игнорируем пользовательский формат.
+        return ctx.begin(); // Просто игнорируем пользовательский формат.
     }
 };
 
@@ -190,4 +190,4 @@ template<> struct formatter<std::vector<std::reference_wrapper<const bookdb::Boo
     }
 };
 
-}  // namespace std
+} // namespace std

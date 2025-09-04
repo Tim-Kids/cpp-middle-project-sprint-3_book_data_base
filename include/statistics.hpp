@@ -15,8 +15,8 @@ namespace bookdb {
 template<BookContainerLike Cont, typename Comparator = TransparentStringLess>
 auto buildAuthorHistogramFlat(const Cont& cont, Comparator comp = {}) {
     std::flat_map<std::string_view, unsigned short int, Comparator> authorHistogram{};
-    std::for_each(cont.cbegin(), cont.cend(),
-                  [&](const auto& book) {
+    std::for_each(cont.begin(), cont.end(),
+                  [&](auto& book) {
                       authorHistogram[const_cast<Book&>(book).author]++;
                   });
     return authorHistogram;
@@ -39,7 +39,7 @@ template<BookContainerLike Cont> auto calculateAverageRating(const Cont& cont) {
     if(cont.empty()) {
         return double{};
     }
-    auto totalRating = std::accumulate(cont.cbegin(), cont.cend(), double{},
+    auto totalRating = std::accumulate(cont.begin(), cont.end(), double{},
                                        [](double sum, const Book& book) {
                                            return sum + book.rating;
                                        });
@@ -47,8 +47,7 @@ template<BookContainerLike Cont> auto calculateAverageRating(const Cont& cont) {
 }
 
 template<BookContainerLike Cont>
-auto sampleRandomBooks(const Cont& cont,
-                       size_t num) {
+auto sampleRandomBooks(const Cont& cont, size_t num) {
     using Ref = std::reference_wrapper<const Book>;
     std::vector<Ref> refs;
     refs.reserve(cont.size());
