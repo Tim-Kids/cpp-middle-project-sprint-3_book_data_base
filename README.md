@@ -1,85 +1,112 @@
-# cpp-middle-project-sprint-3 <!-- omit in toc -->
+# BookDB – A C++ Book Database Library
 
-- [Начало работы](#начало-работы)
-- [Сборка проекта и запуск тестов](#сборка-проекта-и-запуск-тестов)
-  - [Команды для сборки проекта](#команды-для-сборки-проекта)
-  - [Команды для запуска приложения](#команды-для-запуска-приложения)
-  - [Команда для запуска тестов](#команда-для-запуска-тестов)
-  - [Команда для запуска clang-format - Обязательное требование перед сдачей работы на ревью](#команда-для-запуска-clang-format---обязательное-требование-перед-сдачей-работы-на-ревью)
-  - [Команды для запуска отладчика](#команды-для-запуска-отладчика)
-- [Дополнительно](#дополнительно)
+A modern C++23 library for storing, filtering, and analyzing book collections.  
+The project is structured as a reusable library with clear separation of concerns, compile-time safety via concepts, and utilities for filtering, statistics, and formatting.
 
+## Table of Contents
 
-Шаблон репозитория для практического задания 3-го спринта «Мидл разработчик С++»
+- [Features](#features)  
+- [Dependencies](#dependencies)  
+- [Building & Testing](#building--testing)  
+- [Usage](#usage)  
+- [API Overview](#api-overview)  
+  - [Core Components](#core-components)  
+  - [Filtering](#filtering)  
+  - [Statistics](#statistics)  
+- [Project Structure](#project-structure)  
+- [License](#license)
 
-## Начало работы
+## Features
 
-1. Нажмите зелёную кнопку `Use this template`, затем `Create a new repository`.
-2. Назовите свой репозиторий.
-3. Склонируйте созданный репозиторий командой `git clone your-repository-name`.
-4. Создайте новую ветку командой `git switch -c development`.
-5. Откройте проект в `Visual Studio Code`.
-6. Нажмите `F1` и откройте проект в dev-контейнере командой `Dev Containers: Reopen in Container`.
+- **Book model**: strongly typed `Book` struct with title, author, year, genre, rating, and pages.
+- **BookDatabase**: template database class (supports `std::vector` or `std::deque` backend) with author string interning and stable views.
+- **Concepts**: C++20 concepts (`BookLike`, `BookPredicate`, `BookContainerLike`, …) ensure safe and expressive templates.
+- **Comparators**: ready-to-use functors (`LessByAuthor`, `MoreByRating`, `LessByYear`, …).
+- **Filters**: composable predicate factories (`YearBetween`, `RatingAbove`, `GenreIs`), combinators (`all_of`, `any_of`), and `filterBooks`.
+- **Statistics**: author histograms, average ratings, genre averages, random sampling, Top-N queries.
+- **Formatters**: `std::formatter` specializations for pretty-printing books, databases, histograms, and results with `std::format` / `std::print`.
+- **Standard integration**: works seamlessly with iterators, algorithms, and ranges.
 
-## Сборка проекта и запуск тестов
+## Dependencies
 
-Данный репозиторий использует три инструмента:
+- **C++ standard**: C++23 (requires `<flat_map>`, `<print>`, concepts, spans, ranges).  
+- **Build system**: CMake ≥ 3.20  
+- **Testing**: GoogleTest (optional, for unit tests).  
 
-- **Conan** — свободный менеджер пакетов для C и C++ с открытым исходным кодом (MIT). Позволяет настраивать процесс сборки программ, скачивать и устанавливать сторонние зависимости и необходимые инструменты. Подробнее о Conan:
-  - https://habr.com/ru/articles/884464
-  - https://docs.conan.io/2.0/tutorial/consuming_packages/build_simple_cmake_project.html
-  - https://docs.conan.io/2.0/tutorial/consuming_packages/the_flexibility_of_conanfile_py.html
-
-- **cmake** — генератор систем сборки для C и C++. Позволяет создавать проекты, которые могут компилироваться на различных платформах и с различными компиляторами. Подробнее о cmake:
-  - https://dzen.ru/a/ZzZGUm-4o0u-IQlb
-  - https://neerc.ifmo.ru/wiki/index.php?title=CMake_Tutorial
-  - https://cmake.org/cmake/help/book/mastering-cmake/cmake/Help/guide/tutorial/index.html
-
-- **VS Code Dev Docker container** - Docker контейнер, который содержит полностью настроенное окружение для выполнение задания. Подробнее об этой функциональности:
-  - https://habr.com/ru/articles/822707/ - "Почти все, что вы хотели бы знать про Docker"
-  - https://code.visualstudio.com/docs/devcontainers/containers - официальная документация VS Code
-  - https://www.youtube.com/watch?v=p9L7YFqHGk4 - "Docker container for VS Code"
-  - https://www.youtube.com/watch?v=pg19Z8LL06w&t=174s&pp=ygUPRG9ja2VyY29udGFpbmVy - "Docker in 1 hour"
-
-### Команды для сборки проекта
-
-Используйте `F5` для выполнения следующих шагов:
-- Создание папки `build`
-- Вызов `conan` команд для установки требуемых библиотек и запуска процесса сборки
-- Запуска `lldb` отладчика
-
-### Команды для запуска приложения
+## Building & Testing
 
 ```bash
-cd build
-./BookDB 
+git clone <repository_url>
+cd bookdb_project
+mkdir build && cd build
+cmake ..
+make -j
+ctest     # run tests if GoogleTest is available
 ```
 
-### Команда для запуска тестов
+## Usage
 
-```bash
-cd build
-./BookDB_tests
+```cpp
+#include "book_database.hpp"
+#include "filters.hpp"
+#include "statistics.hpp"
+#include <print>
+
+using namespace bookdb;
+
+int main() {
+    BookDatabase<> db;
+    db.EmplaceBack("Dune", "Frank Herbert", 1965, Genre::SciFi, 4.2, 688);
+    db.EmplaceBack("The Hobbit", "J.R.R. Tolkien", 1937, Genre::Fantasy, 4.8, 310);
+
+    auto results = filterBooks(db.begin(), db.end(),
+                               YearBetween(1930, 1970),
+                               RatingAbove(4.0));
+    std::print("Filtered books:\n{}\n", results);
+
+    double avg = calculateAverageRating(db);
+    std::print("Average rating: {:.2f}\n", avg);
+}
 ```
 
-### Команда для запуска clang-format - Обязательное требование перед сдачей работы на ревью
+## API Overview
 
-В данном репозитории настроен автоматический запуск clang-format (файл конфигурации - `.vscode/settings.json`) при сохранении любого файла с кодом
-Убедитесь, что эта функциональность работает:
-- Добавьте несколько пустых линий в любой файл
-- Сохраните его
-- Если пустые линии были удалены - всё работает!
-  - Если нет - убедитесь, что `clangd` работает (при открытии файла с кодом в самом низу `VS Code` на голубой полоске должно быть написано `clangd: idle`), для этого:
-    - вам необходимо нажать `F1` и выполнить команду `clangd: Download language server`
-    - вам необходимо нажать `F1` и выполнить команду `clangd: Restart language server`
-    - вам необходимо нажать `F1` и выполнить команду `Developer: Reload Window`
+### Core Components
+- **`Book`** – metadata record.  
+- **`Genre`** – strongly typed enum.  
+- **`BookDatabase<Container>`** – database with interned authors.  
+  - `PushBack`, `EmplaceBack`  
+  - `size()`, `empty()`  
+  - `begin()`, `end()` iterators  
+  - `GetBooks()`, `GetAuthors()`
 
-### Команды для запуска отладчика
+### Filtering
+- **Factories**: `YearBetween`, `RatingAbove`, `GenreIs`  
+- **Combinators**: `all_of`, `any_of`  
+- **Algorithm**: `filterBooks(It first, It last, preds...)` → `std::vector<std::reference_wrapper<const Book>>`
 
-В `Visual Studio Code` настройки параметров для запуска отладчика находятся в `.vscode/launch.json` файле. Поскольку в этом файле уже есть одна конфигурация `Launch CryptoGuard` для запуска приложения, которое вычисляет контрольную сумму файла, то для запуска отладчика достаточно нажать `F5` или открыть окно `Run and Debug` комбинацией клавиш `Ctrl+Shift+D`.
+### Statistics
+- `calculateAverageRating`  
+- `buildAuthorHistogramFlat`  
+- `calculateGenreRatings`  
+- `sampleRandomBooks`  
+- `getTopNBy`
 
-## Дополнительно
+## Project Structure
 
-- Автодополнение `Ctrl + Space`. Для настройки автодополнения вам необходимо нажать `F1` и выполнить команду `clangd: Download language server`. VS Code сам предложит установить подходящую версию `clangd` (всплывашка в правом нижнем углу). После завершения установки потребуется перезагрузить окно (кнопка перезапуска будет находиться также справа снизу или нажать `F1` и выполнить команду `Developer: Reload Window`)
+- `book.hpp` – Book model and Genre enum  
+- `book_database.hpp` – Database container with author interning  
+- `comparators.hpp` – Sorting functors  
+- `concepts.hpp` – Core concepts  
+- `filters.hpp` – Filtering predicates and helpers  
+- `heterogeneous_lookup.hpp` – Transparent string hash/equal  
+- `statistics.hpp` – Analysis functions  
+- `db_test.cpp` – Unit tests  
 
-Если всё сделано правильно - после успешной сборки проекта вы сможете использовать автодополнение
+## License
+
+MIT License – see [LICENSE](LICENSE).
+
+---
+
+📌 **Note:** A `UML.png` diagram illustrating the architecture is included in the root directory.
