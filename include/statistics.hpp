@@ -26,8 +26,8 @@ template<BookIterator It> auto calculateGenreRatings(It begin, It end) {
             it->second.first += book.rating;
             it->second.second++;
         }
-        else {  // Используем способ создания составного объекта прям в мапе. Исключаем накладные расходы на
-                // конструкторы/операторы копирвоания/перемещения.
+        else {  // РСЃРїРѕР»СЊР·СѓРµРј СЃРїРѕСЃРѕР± СЃРѕР·РґР°РЅРёСЏ СЃРѕСЃС‚Р°РІРЅРѕРіРѕ РѕР±СЉРµРєС‚Р° РїСЂСЏРј РІ РјР°РїРµ. РСЃРєР»СЋС‡Р°РµРј РЅР°РєР»Р°РґРЅС‹Рµ СЂР°СЃС…РѕРґС‹ РЅР°
+                // РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂС‹/РѕРїРµСЂР°С‚РѕСЂС‹ РєРѕРїРёСЂРІРѕР°РЅРёСЏ/РїРµСЂРµРјРµС‰РµРЅРёСЏ.
             genreToRatingAndCount.emplace(std::piecewise_construct,
                                           std::forward_as_tuple(const_cast<Book&>(book).genre),
                                           std::forward_as_tuple(book.rating, 1));
