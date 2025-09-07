@@ -63,11 +63,11 @@ template<BookContainerLike BookContainer = std::deque<Book>> class BookDatabase 
     }
 
     reference operator[](size_t id) noexcept {
-        return books_[id];
+        return books_.at(id);
     }
 
     const_reference operator[](size_t id) const noexcept {
-        return books_[id];
+        return books_.at(id);
     }
 
     template<typename T = Book> void PushBack(T&& book) {
@@ -78,12 +78,12 @@ template<BookContainerLike BookContainer = std::deque<Book>> class BookDatabase 
 
     void EmplaceBack(std::string_view title, std::string_view author, int year, Genre genre, double rating, int pages) {
         auto [it, _] = authors_.emplace(author);
-        books_.emplace_back(std::string{title}, *it, year, genre, rating, pages);
+        books_.emplace_back(std::string {title}, *it, year, genre, rating, pages);
     }
 
     auto GetBooks() const noexcept {
         if constexpr(std::same_as<BookContainer, std::vector<Book>>) {
-            return std::span<const Book>{books_.data(), books_.size()};
+            return std::span<const Book> {books_.data(), books_.size()};
         }
         else {
             return static_cast<const BookContainer&>(books_);
@@ -101,10 +101,10 @@ template<BookContainerLike BookContainer = std::deque<Book>> class BookDatabase 
 
     private:
     BookContainer books_;
-    AuthorContainer authors_; // Хранит оригиналы строк.
+    AuthorContainer authors_;  // Хранит оригиналы строк.
 };
 
-} // namespace bookdb
+}  // namespace bookdb
 
 namespace std {
 template<> struct formatter<bookdb::BookDatabase<std::vector<bookdb::Book>>> {
@@ -123,7 +123,7 @@ template<> struct formatter<bookdb::BookDatabase<std::vector<bookdb::Book>>> {
     }
 
     constexpr auto parse(format_parse_context& ctx) {
-        return ctx.begin(); // Просто игнорируем пользовательский формат.
+        return ctx.begin();  // Просто игнорируем пользовательский формат.
     }
 };
 
@@ -179,7 +179,7 @@ template<> struct formatter<std::flat_map<bookdb::Genre, double>> {
 template<> struct formatter<std::vector<std::reference_wrapper<const bookdb::Book>>> {
     template<typename FormatContext>
     auto format(const std::vector<std::reference_wrapper<const bookdb::Book>>& books, FormatContext& fc) const {
-        for(const auto book: books) {
+        for(const auto& book: books) {
             format_to(fc.out(), "{} -> {}\n", book.get().author, book.get().title);
         }
         return fc.out();
@@ -190,4 +190,4 @@ template<> struct formatter<std::vector<std::reference_wrapper<const bookdb::Boo
     }
 };
 
-} // namespace std
+}  // namespace std
